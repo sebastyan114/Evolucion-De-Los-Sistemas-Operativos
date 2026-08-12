@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolución de los Sistemas Operativos</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: "Courier New", monospace;
+            background:
+                repeating-linear-gradient(
+                    45deg,
+                    #aaa 0px,
+                    #aaa 1px,
+                    #999 1px,
+                    #999 2px
+                );
+            height: 100vh;
+            color: #000;
+            user-select: none;
+        }
+
+        /* =========================
+           BARRA SUPERIOR
+        ========================== */
+
+        .menu-bar {
+            height: 38px;
+            background: #fff;
+            border-bottom: 2px solid #000;
+
+            display: flex;
+            align-items: center;
+            gap: 24px;
+
+            padding: 0 20px;
+
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .apple {
+            font-size: 22px;
+        }
+
+        .menu-item {
+            cursor: pointer;
+            padding: 4px 6px;
+        }
+
+        .menu-item:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        /* =========================
+           ESCRITORIO
+        ========================== */
+
+        .desktop {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 38px);
+        }
+
+        /* =========================
+           VENTANA PRINCIPAL
+        ========================== */
+
+        .window {
+            position: absolute;
+
+            left: 7%;
+            top: 25px;
+
+            width: 70%;
+            max-width: 850px;
+            min-width: 500px;
+
+            height: 390px;
+
+            background: #fff;
+
+            border: 3px solid #000;
+
+            box-shadow:
+                2px 2px 0 #fff,
+                4px 4px 0 #000;
+        }
+
+        .window-title-bar {
+            height: 28px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            position: relative;
+
+            border-bottom: 3px solid #000;
+
+            background:
+                repeating-linear-gradient(
+                    to bottom,
+                    white 0px,
+                    white 2px,
+                    black 2px,
+                    black 3px
+                );
+        }
+
+        .window-title {
+            background: white;
+            padding: 0 12px;
+
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .close-box {
+            position: absolute;
+
+            left: 5px;
+            top: 4px;
+
+            width: 18px;
+            height: 18px;
+
+            background: white;
+            border: 2px solid black;
+
+            cursor: pointer;
+        }
+
+        .window-info {
+            height: 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 0 12px;
+
+            border-bottom: 2px solid #000;
+
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .window-content {
+            height: calc(100% - 58px);
+
+            padding: 35px 25px;
+
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+
+            overflow: auto;
+        }
+
+        /* =========================
+           ICONOS
+        ========================== */
+
+        .desktop-icon {
+            width: 115px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            cursor: pointer;
+
+            text-align: center;
+        }
+
+        .desktop-icon:hover .icon-label {
+            background: #000;
+            color: #fff;
+        }
+
+        .icon {
+            font-size: 46px;
+
+            height: 60px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            filter: grayscale(100%) contrast(180%);
+        }
+
+        .icon-label {
+            background: #fff;
+
+            padding: 3px 5px;
+
+            font-size: 12px;
+
+            margin-top: 4px;
+
+            line-height: 1.2;
+        }
+
+        /* =========================
+           ICONOS EXTERNOS
+        ========================== */
+
+        .system-disk {
+            position: absolute;
+
+            top: 20px;
+            right: 4%;
+        }
+
+        .guided-tour {
+            position: absolute;
+
+            top: 115px;
+            right: 4%;
+        }
+
+        .sys-version {
+            position: absolute;
+
+            bottom: 25px;
+            left: 6%;
+        }
+
+        .my-folder {
+            position: absolute;
+
+            bottom: 25px;
+            left: 25%;
+        }
+
+        .trash {
+            position: absolute;
+
+            bottom: 25px;
+            right: 5%;
+        }
+
+        /* =========================
+           VENTANA DE INFORMACIÓN
+        ========================== */
+
+        .modal-overlay {
+            position: fixed;
+
+            inset: 0;
+
+            display: none;
+
+            justify-content: center;
+            align-items: center;
+
+            background: rgba(0, 0, 0, 0.22);
+
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .dialog {
+            width: 680px;
+            max-width: 92%;
+            max-height: 88vh;
+
+            overflow-y: auto;
+
+            background: #fff;
+
+            border: 3px solid #000;
+
+            box-shadow:
+                3px 3px 0 #fff,
+                6px 6px 0 #000;
+
+            padding: 8px;
+        }
+
+        .dialog-header {
+            height: 27px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                repeating-linear-gradient(
+                    to bottom,
+                    white 0px,
+                    white 2px,
+                    black 2px,
+                    black 3px
+                );
+
+            margin-bottom: 16px;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 2;
+        }
+
+        .dialog-title {
+            background: white;
+
+            padding: 0 10px;
+
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        .dialog-body {
+            display: flex;
+            gap: 20px;
+
+            padding: 10px 20px 20px;
+        }
+
+        .dialog-icon {
+            font-size: 55px;
+
+            min-width: 65px;
+
+            text-align: center;
+
+            filter: grayscale(100%) contrast(180%);
+        }
+
+        .dialog-text {
+            flex: 1;
+
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .dialog-name {
+            display: block;
+
+            font-size: 18px;
+
+            margin-bottom: 10px;
+        }
+
+        .dialog-description {
+            white-space: pre-line;
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: center;
+
+            padding-bottom: 12px;
+        }
+
+        .classic-button {
+            min-width: 110px;
+
+            padding: 7px 20px;
+
+            background: white;
+            color: black;
+
+            border: 3px solid black;
+            border-radius: 3px;
+
+            font-family: "Courier New", monospace;
+            font-size: 15px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow: inset -2px -2px 0 #888;
+        }
+
+        .classic-button:active {
+            background: black;
+            color: white;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 950px) {
+
+            .window {
+                width: 72%;
+                min-width: 0;
+                height: 430px;
+            }
+
+            .window-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .menu-bar {
+                gap: 8px;
+                font-size: 12px;
+                padding: 0 8px;
+            }
+
+            .window {
+                left: 3%;
+                width: 75%;
+                height: 450px;
+            }
+
+            .window-title {
+                font-size: 12px;
+            }
+
+            .window-info {
+                font-size: 9px;
+            }
+
+            .dialog-body {
+                flex-direction: column;
+            }
+
+            .dialog-icon {
+                text-align: left;
+            }
+
+            .system-disk,
+            .guided-tour,
+            .trash {
+                right: 1%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================
+     BARRA SUPERIOR
+========================== -->
+
+<header class="menu-bar">
+
+    <div
+        class="menu-item apple"
+        onclick="showInfo('Apple Menu')">
+        
+    </div>
+
+    <div
+        class="menu-item"
+        onclick="showInfo('Archivo')">
+        Archivo
+    </div>
+
+    <div
+        class="menu-item"
+        onclick="showInfo('Interacción')">
+        Interacción
+    </div>
+
+    <div
+        class="menu-item"
+        onclick="showInfo('Interfaces')">
+        Interfaces
+    </div>
+
+    <div
+        class="menu-item"
+        onclick="showInfo('Funciones')">
+        Funciones
+    </div>
+
+</header>
+
+
+<main class="desktop">
+
+    <!-- =========================
+         VENTANA PRINCIPAL
+    ========================== -->
+
+    <section class="window" id="mainWindow">
+
+        <div class="window-title-bar">
+
+            <div
+                class="close-box"
+                onclick="closeMainWindow()">
+            </div>
+
+            <span class="window-title">
+                Evolución de los Sistemas Operativos
+            </span>
+
+        </div>
+
+
+        <div class="window-info">
+
+            <span>5 generaciones</span>
+
+            <span>1940 - Actualidad</span>
+
+            <span>Historia de los S.O.</span>
+
+        </div>
+
+
+        <div class="window-content">
+
+            <!-- PRIMERA GENERACIÓN -->
+
+            <div
+                class="desktop-icon"
+                onclick="showInfo('Primera Generación')">
+
+                <div class="icon">
+                    🗂️
+                </div>
+
+                <div class="icon-label">
+                    Primera generación
+                </div>
+
+            </div>
+
+
+            <!-- SEGUNDA GENERACIÓN -->
+
+            <div
+                class="desktop-icon"
+                onclick="showInfo('Segunda Generación')">
+
+                <div class="icon">
+                    📟
+                </div>
+
+                <div class="icon-label">
+                    Segunda generación
+                </div>
+
+            </div>
+
+
+            <!-- TERCERA GENERACIÓN -->
+
+            <div
+                class="desktop-icon"
+                onclick="showInfo('Tercera Generación')">
+
+                <div class="icon">
+                    ⌨️
+                </div>
+
+                <div class="icon-label">
+                    Tercera generación
+                </div>
+
+            </div>
+
+
+            <!-- CUARTA GENERACIÓN -->
+
+            <div
+                class="desktop-icon"
+                onclick="showInfo('Cuarta Generación')">
+
+                <div class="icon">
+                    🖥️
+                </div>
+
+                <div class="icon-label">
+                    Cuarta generación
+                </div>
+
+            </div>
+
+
+            <!-- QUINTA GENERACIÓN -->
+
+            <div
+                class="desktop-icon"
+                onclick="showInfo('Quinta Generación')">
+
+                <div class="icon">
+                    🌐
+                </div>
+
+                <div class="icon-label">
+                    Quinta generación
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         ICONOS DEL ESCRITORIO
+    ========================== -->
+
+    <div
+        class="desktop-icon system-disk"
+        onclick="showInfo('System Disk')">
+
+        <div class="icon">
+            💾
+        </div>
+
+        <div class="icon-label">
+            Generaciones
+        </div>
+
+    </div>
+
+
+    <div
+        class="desktop-icon guided-tour"
+        onclick="showInfo('Guided Tour')">
+
+        <div class="icon">
+            📖
+        </div>
+
+        <div class="icon-label">
+            Recorrido
+        </div>
+
+    </div>
+
+
+    <div
+        class="desktop-icon sys-version"
+        onclick="showInfo('SysVersion')">
+
+        <div class="icon">
+            📄
+        </div>
+
+        <div class="icon-label">
+            Línea de tiempo
+        </div>
+
+    </div>
+
+
+    <div
+        class="desktop-icon my-folder"
+        onclick="showInfo('Conceptos')">
+
+        <div class="icon">
+            📁
+        </div>
+
+        <div class="icon-label">
+            Conceptos
+        </div>
+
+    </div>
+
+
+    <div
+        class="desktop-icon trash"
+        onclick="showInfo('Tecnologías antiguas')">
+
+        <div class="icon">
+            🗑️
+        </div>
+
+        <div class="icon-label">
+            Tecnología antigua
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- =========================
+     MODAL DE INFORMACIÓN
+========================== -->
+
+<div class="modal-overlay" id="modal">
+
+    <div class="dialog">
+
+        <div class="dialog-header">
+
+            <span
+                class="dialog-title"
+                id="modalTitle">
+                Información
+            </span>
+
+        </div>
+
+
+        <div class="dialog-body">
+
+            <div
+                class="dialog-icon"
+                id="modalIcon">
+                💻
+            </div>
+
+
+            <div class="dialog-text">
+
+                <strong
+                    class="dialog-name"
+                    id="modalName">
+                </strong>
+
+                <div
+                    class="dialog-description"
+                    id="modalDescription">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="dialog-actions">
+
+            <button
+                class="classic-button"
+                onclick="closeModal()">
+                OK
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+    ========================================
+    INFORMACIÓN DE CADA ELEMENTO
+    ========================================
+    */
+
+    const items = {
+
+        /* ========================================
+           PRIMERA GENERACIÓN
+        ======================================== */
+
+        "Primera Generación": {
+
+            icon: "🗂️",
+
+            description:
+`PRIMERA GENERACIÓN
+1940 - 1955 aproximadamente
+
+En esta etapa todavía no existían los sistemas operativos como los conocemos actualmente. Las primeras computadoras eran máquinas enormes, costosas y complejas que podían ocupar habitaciones completas.
+
+CARACTERÍSTICAS PRINCIPALES
+
+• Utilizaban válvulas de vacío.
+• El procesamiento era principalmente manual.
+• Utilizaban tarjetas perforadas para ingresar información.
+• Podían ejecutar una tarea a la vez.
+• Los programas se escribían directamente en lenguaje máquina.
+• No existían ventanas, iconos ni interfaces gráficas.
+• El operador debía preparar físicamente la computadora para cada trabajo.
+
+¿CÓMO SE UTILIZABAN?
+
+El usuario no se sentaba frente a una computadora como actualmente. Los programadores preparaban las instrucciones y las introducían utilizando tarjetas perforadas, interruptores, cables y otros mecanismos físicos.
+
+Las tarjetas perforadas contenían información mediante pequeños agujeros que representaban datos e instrucciones.
+
+TECNOLOGÍA
+
+• Válvulas de vacío
+• Tarjetas perforadas
+• Tambores magnéticos
+• Interruptores
+• Lenguaje máquina
+
+COMPUTADORAS REPRESENTATIVAS
+
+• ENIAC
+• EDVAC
+• UNIVAC I
+• IBM 701
+
+DATO IMPORTANTE
+
+ENIAC fue terminado en 1945 y presentado públicamente en 1946. Es uno de los computadores electrónicos de propósito general más conocidos de esta primera etapa.
+
+EVOLUCIÓN
+
+Estas primeras máquinas demostraron que era posible automatizar grandes cantidades de cálculos, pero todavía necesitaban demasiado trabajo humano para funcionar.
+
+Esto generó la necesidad de crear mecanismos capaces de administrar automáticamente la ejecución de los programas.`
+        },
+
+
+        /* ========================================
+           SEGUNDA GENERACIÓN
+        ======================================== */
+
+        "Segunda Generación": {
+
+            icon: "📟",
+
+            description:
+`SEGUNDA GENERACIÓN
+1955 - 1965 aproximadamente
+
+Durante esta generación las computadoras comenzaron a ser más pequeñas, rápidas y confiables.
+
+Los transistores reemplazaron progresivamente a las grandes válvulas de vacío utilizadas anteriormente.
+
+Aquí comenzaron a aparecer los primeros sistemas capaces de automatizar parte del funcionamiento de las computadoras.
+
+CARACTERÍSTICAS PRINCIPALES
+
+• Uso de transistores.
+• Menor tamaño de las computadoras.
+• Mayor velocidad de procesamiento.
+• Menor consumo eléctrico.
+• Mayor confiabilidad.
+• Procesamiento por lotes.
+• Uso de tarjetas perforadas.
+• Uso de cintas magnéticas.
+• Aparición de lenguajes de programación de alto nivel.
+
+PROCESAMIENTO POR LOTES
+
+El Batch Processing o procesamiento por lotes consistía en reunir diferentes trabajos y ejecutarlos automáticamente uno después de otro.
+
+Antes, un operador debía preparar la computadora manualmente para cada programa.
+
+Con este sistema, varios programas podían quedar preparados y la máquina continuaba con el siguiente cuando terminaba uno.
+
+LENGUAJES IMPORTANTES
+
+• FORTRAN
+• COBOL
+• ALGOL
+
+SISTEMAS Y COMPUTADORAS
+
+• GM-NAA I/O
+• IBM 1401
+• IBM 7090
+• IBM 7094
+
+DATO IMPORTANTE
+
+Los primeros sistemas operativos aparecieron principalmente como una solución para aprovechar mejor el tiempo extremadamente costoso de las computadoras.
+
+EVOLUCIÓN
+
+La computadora comenzó a encargarse de organizar automáticamente los trabajos que debía ejecutar.
+
+Esta idea sería fundamental para el desarrollo de los sistemas operativos modernos.`
+        },
+
+
+        /* ========================================
+           TERCERA GENERACIÓN
+        ======================================== */
+
+        "Tercera Generación": {
+
+            icon: "⌨️",
+
+            description:
+`TERCERA GENERACIÓN
+1965 - 1980 aproximadamente
+
+La aparición de los circuitos integrados permitió construir computadoras mucho más potentes y eficientes.
+
+Los sistemas operativos evolucionaron enormemente y comenzaron a controlar diferentes procesos al mismo tiempo.
+
+CARACTERÍSTICAS PRINCIPALES
+
+• Circuitos integrados.
+• Multiprogramación.
+• Sistemas multiusuario.
+• Tiempo compartido.
+• Administración de memoria.
+• Administración de archivos.
+• Administración del procesador.
+• Terminales con teclado y monitor.
+• Mayor interacción entre usuario y computadora.
+
+MULTIPROGRAMACIÓN
+
+La computadora podía mantener varios programas cargados en memoria.
+
+Cuando uno de ellos tenía que esperar una operación, el procesador podía continuar trabajando con otro programa.
+
+Esto permitió aprovechar mucho mejor los recursos disponibles.
+
+TIEMPO COMPARTIDO
+
+El procesador podía distribuir pequeños intervalos de tiempo entre diferentes usuarios.
+
+Esto producía la sensación de que varias personas estaban utilizando la computadora simultáneamente.
+
+INTERACCIÓN
+
+Los usuarios comenzaron a utilizar terminales con:
+
+• Monitor
+• Teclado
+• Línea de comandos
+
+Ya podían comunicarse directamente con el sistema sin depender completamente de tarjetas perforadas.
+
+SISTEMAS IMPORTANTES
+
+• IBM OS/360
+• MULTICS
+• UNIX
+
+COMPUTADORA REPRESENTATIVA
+
+• IBM System/360
+
+DATO IMPORTANTE
+
+UNIX comenzó a desarrollarse en 1969 en Bell Labs.
+
+Su diseño tuvo una enorme influencia sobre numerosos sistemas posteriores.
+
+EVOLUCIÓN
+
+El sistema operativo dejó de ser simplemente un mecanismo para ejecutar programas.
+
+Comenzó a convertirse en el verdadero administrador de los recursos de la computadora.`
+        },
+
+
+        /* ========================================
+           CUARTA GENERACIÓN
+        ======================================== */
+
+        "Cuarta Generación": {
+
+            icon: "🖥️",
+
+            description:
+`CUARTA GENERACIÓN
+1980 - 2000 aproximadamente
+
+La llegada del microprocesador permitió reducir enormemente el tamaño y el precio de las computadoras.
+
+Esto hizo posible el crecimiento de las computadoras personales o PC.
+
+Los sistemas operativos dejaron de estar destinados únicamente a grandes empresas y universidades.
+
+CARACTERÍSTICAS PRINCIPALES
+
+• Uso de microprocesadores.
+• Popularización de las computadoras personales.
+• Sistemas operativos para PC.
+• Interfaces mediante comandos.
+• Aparición de interfaces gráficas.
+• Uso generalizado del mouse.
+• Ventanas.
+• Iconos.
+• Carpetas.
+• Menús.
+• Redes de computadoras.
+• Mayor facilidad de uso.
+
+PRIMERA ETAPA: COMANDOS
+
+Muchos computadores personales utilizaban sistemas como MS-DOS.
+
+El usuario debía escribir instrucciones.
+
+Ejemplos:
+
+C:\\> DIR
+
+C:\\> CD DOCUMENTOS
+
+C:\\> COPY ARCHIVO.TXT
+
+No existía todavía un escritorio gráfico moderno.
+
+SEGUNDA ETAPA: INTERFAZ GRÁFICA
+
+Posteriormente comenzaron a popularizarse interfaces donde el usuario podía interactuar utilizando:
+
+• Mouse
+• Ventanas
+• Iconos
+• Carpetas
+• Botones
+• Menús
+
+SISTEMAS IMPORTANTES
+
+• CP/M
+• MS-DOS
+• Macintosh System Software
+• Windows 1.0
+• Windows 3.1
+• Windows 95
+• Windows 98
+• Diferentes distribuciones UNIX
+
+DATO IMPORTANTE
+
+Apple presentó el Macintosh en 1984.
+
+El equipo ayudó a popularizar entre el público general conceptos como ventanas, iconos, escritorio y mouse.
+
+Microsoft posteriormente llevó las interfaces gráficas a millones de computadoras mediante Windows.
+
+EVOLUCIÓN
+
+La computadora dejó de ser una herramienta utilizada principalmente por especialistas.
+
+Comenzó a convertirse en una herramienta cotidiana para hogares, colegios, universidades y empresas.`
+        },
+
+
+        /* ========================================
+           QUINTA GENERACIÓN
+        ======================================== */
+
+        "Quinta Generación": {
+
+            icon: "🌐",
+
+            description:
+`QUINTA GENERACIÓN
+2000 - ACTUALIDAD
+
+Los sistemas operativos actuales administran muchísimo más que una computadora.
+
+Hoy funcionan como plataformas capaces de conectar hardware, aplicaciones, Internet, servicios en la nube y diferentes dispositivos.
+
+También surgieron sistemas operativos diseñados específicamente para teléfonos inteligentes y tablets.
+
+CARACTERÍSTICAS PRINCIPALES
+
+• Interfaces gráficas avanzadas.
+• Multitarea.
+• Conectividad permanente.
+• Internet.
+• Computación en la nube.
+• Sistemas móviles.
+• Pantallas táctiles.
+• Reconocimiento de voz.
+• Biometría.
+• Virtualización.
+• Mayor seguridad.
+• Sincronización entre dispositivos.
+• Tiendas de aplicaciones.
+• Inteligencia artificial.
+
+SISTEMAS OPERATIVOS IMPORTANTES
+
+• Microsoft Windows
+• macOS
+• GNU/Linux
+• Android
+• iOS
+• ChromeOS
+
+DISPOSITIVOS
+
+Los sistemas operativos dejaron de encontrarse únicamente en computadoras.
+
+Actualmente existen en:
+
+• Computadores
+• Smartphones
+• Tablets
+• Televisores
+• Consolas
+• Relojes inteligentes
+• Automóviles
+• Servidores
+• Dispositivos inteligentes
+
+NUEVAS FORMAS DE INTERACCIÓN
+
+Actualmente podemos controlar dispositivos mediante:
+
+• Teclado
+• Mouse
+• Pantallas táctiles
+• Voz
+• Gestos
+• Biometría
+• Asistentes inteligentes
+
+INTELIGENCIA ARTIFICIAL
+
+Los sistemas modernos están incorporando herramientas capaces de:
+
+• Reconocer voz.
+• Analizar imágenes.
+• Generar contenido.
+• Automatizar tareas.
+• Ayudar al usuario.
+• Buscar información.
+• Mejorar la productividad.
+
+DATO IMPORTANTE
+
+Un sistema operativo moderno puede administrar simultáneamente miles de procesos mientras controla memoria, aplicaciones, almacenamiento, seguridad, conexiones de red y dispositivos externos.
+
+EVOLUCIÓN
+
+El sistema operativo pasó de ser una herramienta básica para ejecutar programas a convertirse en una enorme plataforma que conecta al usuario con aplicaciones, dispositivos, Internet, servicios en la nube e inteligencia artificial.`
+        },
+
+
+        /* ========================================
+           SYSTEM DISK
+        ======================================== */
+
+        "System Disk": {
+
+            icon: "💾",
+
+            description:
+`EVOLUCIÓN DE LOS SISTEMAS OPERATIVOS
+
+Bienvenido al recorrido interactivo por la historia de los sistemas operativos.
+
+Dentro de esta ventana encontrará cinco generaciones que muestran cómo evolucionó la relación entre las personas y las computadoras.
+
+RECORRIDO
+
+1. Primera generación
+Tarjetas perforadas y máquinas enormes.
+
+2. Segunda generación
+Transistores y procesamiento por lotes.
+
+3. Tercera generación
+Multiprogramación, terminales y UNIX.
+
+4. Cuarta generación
+Computadoras personales e interfaces gráficas.
+
+5. Quinta generación
+Internet, dispositivos móviles, nube e inteligencia artificial.
+
+Abra cada elemento para conocer su historia.`
+        },
+
+
+        /* ========================================
+           RECORRIDO
+        ======================================== */
+
+        "Guided Tour": {
+
+            icon: "📖",
+
+            description:
+`RECORRIDO GUIADO
+
+La evolución puede entenderse observando cómo cambió la forma de comunicarnos con una computadora.
+
+PRIMERA GENERACIÓN
+
+Tarjetas perforadas
+↓
+La máquina ejecutaba instrucciones introducidas físicamente.
+
+SEGUNDA GENERACIÓN
+
+Procesamiento por lotes
+↓
+Los programas comenzaron a ejecutarse automáticamente uno después de otro.
+
+TERCERA GENERACIÓN
+
+Terminales y comandos
+↓
+Los usuarios podían comunicarse directamente con el computador.
+
+CUARTA GENERACIÓN
+
+Mouse + ventanas + iconos
+↓
+La computadora se hizo mucho más sencilla para el público general.
+
+QUINTA GENERACIÓN
+
+Internet + táctil + voz + IA
+↓
+Los sistemas están permanentemente conectados y disponibles en diferentes dispositivos.`
+        },
+
+
+        /* ========================================
+           LÍNEA DE TIEMPO
+        ======================================== */
+
+        "SysVersion": {
+
+            icon: "📄",
+
+            description:
+`LÍNEA DE TIEMPO
+
+1940 - 1955
+PRIMERA GENERACIÓN
+
+Válvulas de vacío.
+Tarjetas perforadas.
+Procesamiento manual.
+
+↓
+
+1955 - 1965
+SEGUNDA GENERACIÓN
+
+Transistores.
+Procesamiento por lotes.
+Primeros sistemas operativos.
+
+↓
+
+1965 - 1980
+TERCERA GENERACIÓN
+
+Circuitos integrados.
+Multiprogramación.
+Tiempo compartido.
+UNIX.
+
+↓
+
+1980 - 2000
+CUARTA GENERACIÓN
+
+Microprocesadores.
+Computadores personales.
+MS-DOS.
+Macintosh.
+Windows.
+
+↓
+
+2000 - ACTUALIDAD
+QUINTA GENERACIÓN
+
+Internet.
+Smartphones.
+Computación en la nube.
+Android.
+iOS.
+Windows.
+macOS.
+Linux.
+Inteligencia artificial.`
+        },
+
+
+        /* ========================================
+           CONCEPTOS
+        ======================================== */
+
+        "Conceptos": {
+
+            icon: "📁",
+
+            description:
+`¿QUÉ ES UN SISTEMA OPERATIVO?
+
+Un sistema operativo es el software principal de un dispositivo.
+
+Funciona como intermediario entre el usuario, las aplicaciones y los componentes físicos de la computadora.
+
+Sus principales funciones son:
+
+PROCESADOR
+
+Decide qué programas pueden utilizar el procesador y durante cuánto tiempo.
+
+MEMORIA
+
+Administra la memoria RAM utilizada por las aplicaciones.
+
+ARCHIVOS
+
+Organiza documentos, carpetas y datos almacenados.
+
+DISPOSITIVOS
+
+Controla componentes como:
+
+• Teclado
+• Mouse
+• Monitor
+• Impresora
+• Disco duro
+• USB
+
+APLICACIONES
+
+Permite instalar y ejecutar programas.
+
+USUARIOS
+
+Administra cuentas, contraseñas y permisos.
+
+RED
+
+Permite establecer conexiones entre dispositivos e Internet.
+
+SEGURIDAD
+
+Protege los recursos del sistema y controla qué puede hacer cada usuario o programa.`
+        },
+
+
+        /* ========================================
+           TECNOLOGÍA ANTIGUA
+        ======================================== */
+
+        "Tecnologías antiguas": {
+
+            icon: "🗑️",
+
+            description:
+`TECNOLOGÍAS QUE MARCARON LA HISTORIA
+
+Muchas tecnologías antiguas desaparecieron o dejaron de utilizarse de forma cotidiana, pero fueron fundamentales para la evolución de los sistemas operativos.
+
+VÁLVULAS DE VACÍO
+
+Componentes electrónicos enormes que generaban mucho calor y consumían grandes cantidades de electricidad.
+
+TARJETAS PERFORADAS
+
+Tarjetas de papel rígido donde los agujeros representaban información.
+
+INTERRUPTORES Y CABLES
+
+Algunas computadoras necesitaban ser configuradas físicamente antes de ejecutar determinados programas.
+
+CINTAS MAGNÉTICAS
+
+Permitieron almacenar grandes cantidades de información.
+
+TERMINALES
+
+Permitieron que los usuarios interactuaran directamente con grandes computadores.
+
+LÍNEA DE COMANDOS
+
+Durante muchos años fue una de las principales maneras de controlar un sistema operativo.
+
+Aunque muchas de estas tecnologías fueron reemplazadas, hicieron posible el desarrollo de los sistemas actuales.`
+        },
+
+
+        /* ========================================
+           APPLE MENU
+        ======================================== */
+
+        "Apple Menu": {
+
+            icon: "",
+
+            description:
+`ACERCA DE ESTE PROYECTO
+
+Este escritorio utiliza como inspiración las interfaces clásicas del Macintosh.
+
+El objetivo es representar de manera interactiva la evolución de los sistemas operativos.
+
+La propia apariencia de esta página representa uno de los momentos más importantes de esta historia: la popularización de las interfaces gráficas.
+
+Seleccione cualquiera de las cinco generaciones para explorar su evolución.`
+        },
+
+
+        /* ========================================
+           ARCHIVO
+        ======================================== */
+
+        "Archivo": {
+
+            icon: "📄",
+
+            description:
+`SISTEMAS DE ARCHIVOS
+
+Una de las funciones más importantes de un sistema operativo es organizar la información almacenada.
+
+Gracias al sistema de archivos podemos trabajar con:
+
+• Documentos
+• Carpetas
+• Fotografías
+• Videos
+• Programas
+• Bases de datos
+• Dispositivos de almacenamiento
+
+Los sistemas operativos modernos permiten crear, copiar, mover, modificar y eliminar archivos fácilmente.
+
+Esta funcionalidad evolucionó enormemente desde las tarjetas perforadas y cintas magnéticas de las primeras computadoras.`
+        },
+
+
+        /* ========================================
+           INTERACCIÓN
+        ======================================== */
+
+        "Interacción": {
+
+            icon: "⌨️",
+
+            description:
+`EVOLUCIÓN DE LA INTERACCIÓN
+
+Una de las mejores formas de observar la evolución de los sistemas operativos es analizar cómo las personas han dado instrucciones a las computadoras.
+
+TARJETAS PERFORADAS
+↓
+
+Interruptores y conexiones físicas
+↓
+
+Procesamiento por lotes
+↓
+
+Terminales
+↓
+
+Línea de comandos
+↓
+
+Teclado y mouse
+↓
+
+Ventanas e iconos
+↓
+
+Pantallas táctiles
+↓
+
+Reconocimiento de voz
+↓
+
+Gestos y biometría
+↓
+
+Inteligencia artificial
+
+Cada generación buscó hacer la comunicación entre persona y máquina más rápida, sencilla y natural.`
+        },
+
+
+        /* ========================================
+           INTERFACES
+        ======================================== */
+
+        "Interfaces": {
+
+            icon: "👁️",
+
+            description:
+`EVOLUCIÓN DE LAS INTERFACES
+
+PRIMERA GENERACIÓN
+
+Prácticamente no existía una interfaz para el usuario.
+
+SEGUNDA GENERACIÓN
+
+El operador controlaba los trabajos utilizando dispositivos físicos y sistemas de procesamiento por lotes.
+
+TERCERA GENERACIÓN
+
+Aparecieron terminales de texto y líneas de comandos.
+
+CUARTA GENERACIÓN
+
+Se popularizaron:
+
+• Escritorios
+• Ventanas
+• Iconos
+• Carpetas
+• Menús
+• Mouse
+
+QUINTA GENERACIÓN
+
+Las interfaces incorporaron:
+
+• Pantallas táctiles
+• Animaciones
+• Reconocimiento de voz
+• Gestos
+• Biometría
+• Interfaces adaptativas
+• Inteligencia artificial
+
+La evolución siempre ha buscado reducir la dificultad necesaria para comunicarnos con las máquinas.`
+        },
+
+
+        /* ========================================
+           FUNCIONES
+        ======================================== */
+
+        "Funciones": {
+
+            icon: "⚙️",
+
+            description:
+`FUNCIONES DE UN SISTEMA OPERATIVO
+
+Un sistema operativo moderno administra prácticamente todos los recursos de un dispositivo.
+
+PROCESADOR
+
+Distribuye el tiempo disponible entre diferentes programas.
+
+MEMORIA
+
+Controla qué cantidad de memoria utiliza cada proceso.
+
+ALMACENAMIENTO
+
+Administra discos y otros dispositivos.
+
+ARCHIVOS
+
+Organiza la información.
+
+HARDWARE
+
+Permite utilizar teclado, mouse, monitor, impresoras y otros componentes.
+
+APLICACIONES
+
+Permite ejecutar programas.
+
+USUARIOS
+
+Gestiona cuentas y permisos.
+
+REDES
+
+Permite la comunicación con otros dispositivos e Internet.
+
+SEGURIDAD
+
+Protege archivos, usuarios y recursos.
+
+INTERFAZ
+
+Proporciona una forma para que el usuario interactúe con el dispositivo.
+
+El sistema operativo es, en pocas palabras, el administrador central de la computadora.`
+        }
+
+    };
+
+
+    /*
+    ========================================
+    MOSTRAR INFORMACIÓN
+    ========================================
+    */
+
+    function showInfo(name) {
+
+        const item = items[name];
+
+        if (!item) {
+            return;
+        }
+
+        document.getElementById("modalTitle").textContent =
+            name;
+
+        document.getElementById("modalName").textContent =
+            name;
+
+        document.getElementById("modalDescription").textContent =
+            item.description;
+
+        document.getElementById("modalIcon").textContent =
+            item.icon;
+
+        document
+            .getElementById("modal")
+            .classList.add("active");
+    }
+
+
+    /*
+    ========================================
+    CERRAR MODAL
+    ========================================
+    */
+
+    function closeModal() {
+
+        document
+            .getElementById("modal")
+            .classList.remove("active");
+    }
+
+
+    /*
+    ========================================
+    CERRAR VENTANA PRINCIPAL
+    ========================================
+    */
+
+    function closeMainWindow() {
+
+        document
+            .getElementById("mainWindow")
+            .style.display = "none";
+    }
+
+
+    /*
+    ========================================
+    CERRAR CON ESC
+    ========================================
+    */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+                closeModal();
+            }
+
+        }
+    );
+
+
+    /*
+    ========================================
+    CERRAR AL PRESIONAR FUERA
+    ========================================
+    */
+
+    document
+        .getElementById("modal")
+        .addEventListener(
+            "click",
+            function(event) {
+
+                if (event.target === this) {
+                    closeModal();
+                }
+
+            }
+        );
+
+</script>
+
+</body>
+</html>
